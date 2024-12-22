@@ -5,65 +5,65 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Engine/EngineTypes.h"
-		
+#include "EngineUtils.h"
+#include "GameFramework/Actor.h"
+
+DEFINE_LOG_CATEGORY(LogTimeOfDay);
+
+UTimeOfDayWorldSubsystem::UTimeOfDayWorldSubsystem()
+{
+}
 
 void UTimeOfDayWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Time of Day Initialize !!!"));
+	Super::Initialize(Collection);
 
 	const UWorld* World = GetWorld();
 	if (!World)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Time of Day Initialize No World"));
 		return;
 	}
 
-
-	UE_LOG(LogTemp, Warning, TEXT("Is Tickable: %s"), IsTickable() ? TEXT("True") : TEXT("False"));
-
-	UE_LOG(LogTemp, Warning, TEXT("Time of Day Initialize World: %s"), *World->GetName());
-
-	const EWorldType::Type WorldType = World->WorldType;
-	if (WorldType == EWorldType::Editor)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Time of Day Initialize Editor"), TimeOfDay);
-		return;
-	}
-
-	//UE_LOG(LogTemp, Warning, TEXT("Time of Day Initialize!!!"), TimeOfDay);
-	//UE_LOG(LogTemp, Warning, TEXT("World Type: %s"), *UEnum::GetValueAsString(WorldType));
+	UE_LOG(LogTimeOfDay, Warning, TEXT("Initialize"), TimeOfDay);
 }
 
 void UTimeOfDayWorldSubsystem::Deinitialize()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Time of Day Deinitialize"), TimeOfDay);
+	UE_LOG(LogTimeOfDay, Warning, TEXT("Deinitialize"), TimeOfDay);
+	Super::Deinitialize();
 }
 
 void UTimeOfDayWorldSubsystem::Tick(float DeltaTime)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Time of Day Tick global"), TimeOfDay);
-	
 	TimeSinceLastTick += DeltaTime;
 	if (TimeSinceLastTick < TickInterval)
 	{
 		return;
 	}
 
-	if (GIsEditor)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("Time of Day Tick Editor"), TimeOfDay);
-		//return;
-	}
-	
-	TimeOfDay += DeltaTime * TimeScale;
-	TimeOfDay = FMath::Fmod(TimeOfDay, 24.0f);
-
-	bIsDayTime = TimeOfDay >= DawnTime && TimeOfDay < DuskTime;
-	bIsNightTime = !bIsDayTime;
-
-	//UE_LOG(LogTemp, Warning, TEXT("Time of Day: %f"), TimeOfDay);
-	//UE_LOG(LogTemp, Warning, TEXT("Is Day Time: %s"), bIsDayTime ? TEXT("True") : TEXT("False"));
-
+	SetTimeOfDay(TimeOfDay + TimeScale * TimeSinceLastTick);
 	TimeSinceLastTick = 0.0f;
+}
 
+void UTimeOfDayWorldSubsystem::SetTimeOfDay(float NewTimeOfDay)
+{
+	TimeOfDay = FMath::Fmod(NewTimeOfDay, 24.0f);
+
+	bool NewIsDayTime = TimeOfDay >= DawnTime && TimeOfDay < DuskTime;
+	if (NewIsDayTime != bIsDayTime)
+	{
+		bIsDayTime = NewIsDayTime;
+		bIsNightTime = !bIsDayTime;
+		OnDayNightChanged.Broadcast(bIsNightTime);
+	}
+
+	OnTimeOfDayChanged.Broadcast(TimeOfDay, bIsNightTime);
+}
+
+FString UTimeOfDayWorldSubsystem::GetTimeOfDayAsString() const
+{
+	int32 Hours = FMath::FloorToInt(TimeOfDay);
+	int32 Minutes = FMath::RoundToInt((TimeOfDay - Hours) * 60.0f);
+	FString TimeString = FString::Printf(TEXT("%02d:%02d"), Hours, Minutes);
+	return TimeString;
 }
