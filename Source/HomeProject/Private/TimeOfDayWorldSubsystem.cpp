@@ -18,8 +18,7 @@ void UTimeOfDayWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	const UWorld* World = GetWorld();
-	if (!World)
+	if (!IsValid(GetWorld()))
 	{
 		return;
 	}
@@ -35,6 +34,11 @@ void UTimeOfDayWorldSubsystem::Deinitialize()
 
 void UTimeOfDayWorldSubsystem::Tick(float DeltaTime)
 {
+	if (!IsValid(GetWorld()))
+	{
+		return;
+	}
+
 	TimeSinceLastTick += DeltaTime;
 	if (TimeSinceLastTick < TickInterval)
 	{
@@ -47,6 +51,11 @@ void UTimeOfDayWorldSubsystem::Tick(float DeltaTime)
 
 void UTimeOfDayWorldSubsystem::SetTimeOfDay(float NewTimeOfDay)
 {
+	if (!IsValid(GetWorld()))
+	{
+		return;
+	}
+
 	TimeOfDay = FMath::Fmod(NewTimeOfDay, 24.0f);
 
 	bool NewIsDayTime = TimeOfDay >= DawnTime && TimeOfDay < DuskTime;
@@ -62,6 +71,11 @@ void UTimeOfDayWorldSubsystem::SetTimeOfDay(float NewTimeOfDay)
 
 FString UTimeOfDayWorldSubsystem::GetTimeOfDayAsString() const
 {
+	if (!IsValid(GetWorld()))
+	{
+		return FString();
+	}
+
 	int32 Hours = FMath::FloorToInt(TimeOfDay);
 	int32 Minutes = FMath::RoundToInt((TimeOfDay - Hours) * 60.0f);
 	FString TimeString = FString::Printf(TEXT("%02d:%02d"), Hours, Minutes);

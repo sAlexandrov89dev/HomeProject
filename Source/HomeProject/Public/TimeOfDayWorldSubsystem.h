@@ -50,13 +50,13 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Time of Day", meta = (ClampMin = "0.0", ClampMax = "24.0"))
-	float TickInterval = 0.1f;
+	float TickInterval = 0.04f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Time of Day", meta = (ClampMin = "0.0", ClampMax = "24.0"))
 	float TimeOfDay = 12.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Time of Day", meta = (ClampMin = "0.0", ClampMax = "24.0"))
-	float TimeScale = 0.2f;
+	float TimeScale = 0.1f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Time of Day", meta = (ClampMin = "0.0", ClampMax = "24.0"))
 	float DawnTime = 6.0f;
