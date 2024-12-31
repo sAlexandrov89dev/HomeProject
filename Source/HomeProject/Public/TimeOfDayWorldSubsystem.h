@@ -5,6 +5,8 @@
 #include "Delegates/DelegateCombinations.h"
 #include "Delegates/Delegate.h"
 #include "UObject/SparseDelegate.h"
+#include "TimeOfDayWorldSettings.h"
+
 #include "TimeOfDayWorldSubsystem.generated.h"
 
 // Define custom logger

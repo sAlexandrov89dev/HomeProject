@@ -24,6 +24,13 @@ void UTimeOfDayWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	}
 
 	UE_LOG(LogTimeOfDay, Warning, TEXT("Initialize"), TimeOfDay);
+
+	// Find the TimeOfDayWorldSettings object in the world
+	if (ATimeOfDayWorldSettings* TimeOfDayWorldSettings = Cast<ATimeOfDayWorldSettings>(GetWorld()->GetWorldSettings()))
+	{
+		SetTimeOfDay(TimeOfDayWorldSettings->DefaultTimeOfDay);
+		UE_LOG(LogTimeOfDay, Warning, TEXT("Default Time Of Day Set: %f"), TimeOfDay);
+	}
 }
 
 void UTimeOfDayWorldSubsystem::Deinitialize()
